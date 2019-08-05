@@ -54,7 +54,7 @@ public class RoutesEndpoint {
         Stream<UriRoute> uriRoutes = router.uriRoutes()
                 .sorted(Comparator
                         .comparing((UriRoute r) -> r.getUriMatchTemplate().toPathString())
-                        .thenComparing((UriRoute r) -> r.getHttpMethod().ordinal()));
+                        .thenComparing((UriRoute r) -> r.getHttpMethod().name()));
         return Single.fromPublisher(routeDataCollector.getData(uriRoutes));
     }
 }

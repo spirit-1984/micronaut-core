@@ -59,7 +59,7 @@ public @interface Filter {
     /**
      * @return The methods to match. Defaults to all
      */
-    HttpMethod[] methods() default {};
+    String[] methods() default {};
 
     /**
      * The service identifiers this filter applies to. Currently, applies only to {@link io.micronaut.http.filter.HttpClientFilter} instances.

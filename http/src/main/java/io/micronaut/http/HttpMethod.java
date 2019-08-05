@@ -15,72 +15,112 @@
  */
 package io.micronaut.http;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static io.micronaut.http.RequestBodyRequired.CUSTOM;
+import static io.micronaut.http.RequestBodyRequired.NONE;
+import static io.micronaut.http.RequestBodyRequired.PERMITTED;
+import static io.micronaut.http.RequestBodyRequired.REQUIRED;
+
 /**
  * An enum containing the valid HTTP methods. See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html.
  *
  * @author Graeme Rocher
  * @since 1.0
  */
-public enum HttpMethod implements CharSequence {
+public final class HttpMethod implements CharSequence {
+    private final String name;
+    private final RequestBodyRequired requestBodyRequired;
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.2.
      */
-    OPTIONS,
+    public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS", PERMITTED);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.3.
      */
-    GET,
+    public static final HttpMethod GET = new HttpMethod("GET", NONE);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4.
      */
-    HEAD,
+    public static final HttpMethod HEAD = new HttpMethod("HEAD", NONE);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.5.
      */
-    POST,
+    public static final HttpMethod POST = new HttpMethod("POST", RequestBodyRequired.REQUIRED);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.6.
      */
-    PUT,
+    public static final HttpMethod PUT = new HttpMethod("PUT", RequestBodyRequired.REQUIRED);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7.
      */
-    DELETE,
+    public static final HttpMethod DELETE = new HttpMethod("DELETE", PERMITTED);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.8.
      */
-    TRACE,
+    public static final HttpMethod TRACE = new HttpMethod("NONE", NONE);
 
     /**
      * See https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.9.
      */
-    CONNECT,
+    public static final HttpMethod CONNECT = new HttpMethod("CONNECT", NONE);
 
     /**
      * See https://tools.ietf.org/html/rfc5789.
      */
-    PATCH;
+    public static final HttpMethod PATCH = new HttpMethod("PATCH", RequestBodyRequired.REQUIRED);
+
+    private static final Map<String, HttpMethod> methodMap;
+
+    static {
+        methodMap = new HashMap<>();
+        Stream.of(OPTIONS, GET, HEAD, POST, PUT, PATCH, DELETE, TRACE, CONNECT)
+                .forEach(method -> methodMap.put(method.name, method));
+    }
+
+    public static HttpMethod valueOf(String method) {
+        if (method == null) {
+            throw new NullPointerException("method cannot be null");
+        }
+
+        method = method.toUpperCase();
+
+        if (methodMap.containsKey(method)) {
+            return methodMap.get(method);
+        }
+
+        // So this is a custom method not included in HTTP protocol, perhaps a WEBDAV
+        return new HttpMethod(method, CUSTOM);
+    }
+
+
+    private HttpMethod(String name, RequestBodyRequired requestBodyRequired) {
+        this.name = name.toUpperCase();
+        this.requestBodyRequired = requestBodyRequired;
+    }
 
     @Override
     public int length() {
-        return name().length();
+        return name.length();
     }
 
     @Override
     public char charAt(int index) {
-        return name().charAt(index);
+        return name.charAt(index);
     }
 
     @Override
     public CharSequence subSequence(int start, int end) {
-        return name().subSequence(start, end);
+        return name.subSequence(start, end);
     }
 
     /**
@@ -90,7 +130,7 @@ public enum HttpMethod implements CharSequence {
      * @return True if it does
      */
     public static boolean requiresRequestBody(HttpMethod method) {
-        return method != null && (method.equals(POST) || method.equals(PUT) || method.equals(PATCH));
+        return method != null && method.requestBodyRequired == REQUIRED;
     }
 
     /**
@@ -100,8 +140,25 @@ public enum HttpMethod implements CharSequence {
      * @return True if it does
      */
     public static boolean permitsRequestBody(HttpMethod method) {
-        return requiresRequestBody(method)
-            || method.equals(OPTIONS)
-            || method.equals(DELETE);
+        return method != null && (requiresRequestBody(method) || method.requestBodyRequired == PERMITTED);
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof HttpMethod && name.equals(((HttpMethod) obj).name);
+    }
+
+    public String name() {
+        return name;
     }
 }

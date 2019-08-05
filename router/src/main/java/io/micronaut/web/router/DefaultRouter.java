@@ -29,6 +29,16 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static io.micronaut.http.HttpMethod.CONNECT;
+import static io.micronaut.http.HttpMethod.DELETE;
+import static io.micronaut.http.HttpMethod.GET;
+import static io.micronaut.http.HttpMethod.HEAD;
+import static io.micronaut.http.HttpMethod.OPTIONS;
+import static io.micronaut.http.HttpMethod.PATCH;
+import static io.micronaut.http.HttpMethod.POST;
+import static io.micronaut.http.HttpMethod.PUT;
+import static io.micronaut.http.HttpMethod.TRACE;
+
 /**
  * <p>The default {@link Router} implementation. This implementation does not perform any additional caching of
  * route discovery.</p>
@@ -39,7 +49,7 @@ import java.util.stream.Stream;
 @Singleton
 public class DefaultRouter implements Router {
 
-    private final UriRoute[][] routesByMethod = new UriRoute[HttpMethod.values().length][];
+    private final Map<HttpMethod, List<UriRoute>> routesByMethod = new HashMap<>();
     private final Set<StatusRoute> statusRoutes = new HashSet<>();
     private final Collection<FilterRoute> filterRoutes = new ArrayList<>();
     private final Set<ErrorRoute> errorRoutes = new HashSet<>();
@@ -51,50 +61,11 @@ public class DefaultRouter implements Router {
      */
     @Inject
     public DefaultRouter(Collection<RouteBuilder> builders) {
-        List<UriRoute> getRoutes = new ArrayList<>();
-        List<UriRoute> putRoutes = new ArrayList<>();
-        List<UriRoute> postRoutes = new ArrayList<>();
-        List<UriRoute> patchRoutes = new ArrayList<>();
-        List<UriRoute> deleteRoutes = new ArrayList<>();
-        List<UriRoute> optionsRoutes = new ArrayList<>();
-        List<UriRoute> headRoutes = new ArrayList<>();
-        List<UriRoute> connectRoutes = new ArrayList<>();
-        List<UriRoute> traceRoutes = new ArrayList<>();
-
         for (RouteBuilder builder : builders) {
             List<UriRoute> constructedRoutes = builder.getUriRoutes();
             for (UriRoute route : constructedRoutes) {
-                switch (route.getHttpMethod()) {
-                    case GET:
-                        getRoutes.add(route);
-                        break;
-                    case PUT:
-                        putRoutes.add(route);
-                        break;
-                    case POST:
-                        postRoutes.add(route);
-                        break;
-                    case PATCH:
-                        patchRoutes.add(route);
-                        break;
-                    case DELETE:
-                        deleteRoutes.add(route);
-                        break;
-                    case OPTIONS:
-                        optionsRoutes.add(route);
-                        break;
-                    case HEAD:
-                        headRoutes.add(route);
-                        break;
-                    case CONNECT:
-                        connectRoutes.add(route);
-                        break;
-                    case TRACE:
-                        traceRoutes.add(route);
-                        break;
-                    default:
-                        // no-op
-                }
+                HttpMethod method = route.getHttpMethod();
+                routesByMethod.computeIfAbsent(method, x -> new ArrayList<>()).add(route);
             }
 
             this.statusRoutes.addAll(builder.getStatusRoutes());
@@ -102,38 +73,8 @@ public class DefaultRouter implements Router {
             this.filterRoutes.addAll(builder.getFilterRoutes());
         }
 
-        for (HttpMethod method : HttpMethod.values()) {
-            switch (method) {
-                case GET:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(getRoutes);
-                    break;
-                case PUT:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(putRoutes);
-                    break;
-                case POST:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(postRoutes);
-                    break;
-                case PATCH:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(patchRoutes);
-                    break;
-                case DELETE:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(deleteRoutes);
-                    break;
-                case OPTIONS:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(optionsRoutes);
-                    break;
-                case HEAD:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(headRoutes);
-                    break;
-                case CONNECT:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(connectRoutes);
-                    break;
-                case TRACE:
-                    routesByMethod[method.ordinal()] = finalizeRoutes(traceRoutes);
-                    break;
-                default:
-                    // no-op
-            }
+        for (List<UriRoute> routes : routesByMethod.values()) {
+            finalizeRoutes(routes);
         }
     }
 
@@ -149,9 +90,8 @@ public class DefaultRouter implements Router {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> Stream<UriRouteMatch<T, R>> find(HttpMethod httpMethod, CharSequence uri) {
-        UriRoute[] routes = routesByMethod[httpMethod.ordinal()];
-        return Arrays
-            .stream(routes)
+        List<UriRoute> routes = routesByMethod.get(httpMethod);
+        return routes.stream()
             .map((route -> route.match(uri.toString())))
             .filter(Optional::isPresent)
             .map(Optional::get);
@@ -159,16 +99,15 @@ public class DefaultRouter implements Router {
 
     @Override
     public Stream<UriRoute> uriRoutes() {
-        return Arrays
-            .stream(routesByMethod)
-            .flatMap(Arrays::stream);
+        return routesByMethod.values()
+                .stream()
+                .flatMap(List::stream);
     }
 
     @Override
     public <T, R> Optional<UriRouteMatch<T, R>> route(HttpMethod httpMethod, CharSequence uri) {
-        UriRoute[] routes = routesByMethod[httpMethod.ordinal()];
-        Optional<UriRouteMatch> result = Arrays
-            .stream(routes)
+        List<UriRoute> routes = routesByMethod.get(httpMethod);
+        Optional<UriRouteMatch> result = routes.stream()
             .map((route -> route.match(uri.toString())))
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -247,19 +186,16 @@ public class DefaultRouter implements Router {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> Stream<UriRouteMatch<T, R>> findAny(CharSequence uri) {
-        return Arrays
-            .stream(routesByMethod)
+        return uriRoutes()
             .filter(Objects::nonNull)
-            .flatMap(Arrays::stream)
             .map(route -> route.match(uri.toString()))
             .filter(Optional::isPresent)
             .map(Optional::get);
     }
 
-    private UriRoute[] finalizeRoutes(List<UriRoute> routes) {
+    private void finalizeRoutes(List<UriRoute> routes) {
         Collections.sort(routes);
         Collections.reverse(routes);
-        return routes.toArray(new UriRoute[0]);
     }
 
     private <T> Optional<RouteMatch<T>> findRouteMatch(Map<ErrorRoute, RouteMatch<T>> matchedRoutes, Throwable error) {

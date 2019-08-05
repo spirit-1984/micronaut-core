@@ -71,4 +71,10 @@ public class HelloController {
         return message;
     }
 
+    @CustomHttpMethod(method= "REPORT", value = "/greet/{name}", consumes = MediaType.TEXT_PLAIN, produces = MediaType.TEXT_PLAIN)
+    @Status(HttpStatus.CREATED)
+    String echoReport(String name) {
+        return "Hello from REPORT " + name;
+    }
+
 }
