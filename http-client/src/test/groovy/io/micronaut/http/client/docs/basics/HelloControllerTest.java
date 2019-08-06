@@ -15,29 +15,24 @@
  */
 package io.micronaut.http.client.docs.basics;
 
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.core.io.buffer.ByteBuffer;
 import io.micronaut.core.type.Argument;
-import io.micronaut.http.HttpMethod;
-import io.micronaut.http.HttpRequestFactory;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.uri.UriBuilder;
 import io.micronaut.runtime.server.EmbeddedServer;
+
+import static io.micronaut.http.HttpRequest.*;
+import static org.junit.Assert.*;
+
 import io.reactivex.Flowable;
 import org.junit.Test;
 
-import static io.micronaut.http.HttpRequest.GET;
-import static io.micronaut.http.HttpRequest.POST;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author graemerocher
@@ -227,28 +222,6 @@ public class HelloControllerTest {
                 message.get().getText()
         );
 
-
-        embeddedServer.stop();
-        client.stop();
-    }
-
-    @Test
-    public void testReport() {
-        EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer.class);
-        RxHttpClient client = embeddedServer.getApplicationContext().createBean(RxHttpClient.class, embeddedServer.getURL());
-
-        // tag::postpojo[]
-        Flowable<HttpResponse<ByteBuffer>> call = client.exchange(
-                HttpRequestFactory.INSTANCE.create(HttpMethod.valueOf("REPORT"), "/greet/John"));
-
-        HttpResponse<ByteBuffer> response = call.blockingFirst();
-
-        assertEquals(
-                HttpStatus.CREATED,
-                response.getStatus() // <3>
-        );
-
-        assertEquals("Hello from REPORT John", response.getBody().get().toString(Charset.defaultCharset()));
 
         embeddedServer.stop();
         client.stop();

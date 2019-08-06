@@ -54,7 +54,6 @@ import java.util.Optional;
  * @since 1.0
  */
 @Internal
-public
 class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
 
     private final NettyHttpHeaders headers = new NettyHttpHeaders();

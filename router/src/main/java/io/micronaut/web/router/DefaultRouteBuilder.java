@@ -364,8 +364,6 @@ public abstract class DefaultRouteBuilder implements RouteBuilder {
         return buildBeanRoute(HttpMethod.TRACE, uri, beanDefinition, method);
     }
 
-
-
     /**
      * Build a route.
      *
@@ -408,7 +406,7 @@ public abstract class DefaultRouteBuilder implements RouteBuilder {
         return route;
     }
 
-    protected UriRoute buildBeanRoute(HttpMethod httpMethod, String uri, BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
+    private UriRoute buildBeanRoute(HttpMethod httpMethod, String uri, BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
         io.micronaut.context.Qualifier<?> qualifier = beanDefinition.getAnnotationTypeByStereotype(Qualifier.class).map(aClass -> Qualifiers.byAnnotation(beanDefinition, aClass)).orElse(null);
         if (qualifier == null && beanDefinition.isIterable() && beanDefinition instanceof NameResolver) {
             qualifier = ((NameResolver) beanDefinition).resolveName()
