@@ -105,6 +105,15 @@ public interface HttpRequestFactory {
      */
     <T> MutableHttpRequest<T> create(HttpMethod httpMethod, String uri);
 
+    /**
+     * Create a new {@link MutableHttpRequest} for the given method and URI.
+     *
+     * @param httpMethod The method
+     * @param uri        The URI
+     * @param <T>        The Http request type
+     * @param methodName The method actual name. Does not differ from httpMethod.name() for standard http methods.
+     * @return The request
+     */
     default <T> MutableHttpRequest<T> create(HttpMethod httpMethod, String uri, String methodName) {
         return create(httpMethod, uri);
     }

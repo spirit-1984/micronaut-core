@@ -15,34 +15,43 @@
  */
 package io.micronaut.web.router;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+
+import javax.inject.Singleton;
+
 import io.micronaut.context.ExecutionHandleLocator;
 import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.reflect.ClassLoadingReporter;
-import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpMethod;
-import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
+import io.micronaut.http.annotation.Consumes;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.CustomHttpMethod;
+import io.micronaut.http.annotation.Delete;
 import io.micronaut.http.annotation.Error;
-import io.micronaut.http.annotation.*;
-import io.micronaut.http.uri.UriMatchTemplate;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Head;
+import io.micronaut.http.annotation.HttpMethodMapping;
+import io.micronaut.http.annotation.Options;
+import io.micronaut.http.annotation.Patch;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.annotation.Put;
+import io.micronaut.http.annotation.Trace;
+import io.micronaut.http.annotation.UriMapping;
 import io.micronaut.http.uri.UriTemplate;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
-
-import javax.inject.Singleton;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 /**
  * Responsible for building {@link Route} instances for the annotations found in the {@code io.micronaut.http.annotation}

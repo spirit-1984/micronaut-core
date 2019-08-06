@@ -63,16 +63,7 @@ public abstract class AbstractNettyHttpRequest<B> extends DefaultAttributeMap im
         String fullUri = nettyRequest.uri();
         this.uri = URI.create(fullUri);
         this.methodName = nettyRequest.method().name().toUpperCase();
-        System.out.println("THE ACTUAL METHOD NAME IS: " + methodName);
-        this.httpMethod = parse(methodName);
-    }
-
-    private static HttpMethod parse(String methodName) {
-        try {
-            return HttpMethod.valueOf(methodName);
-        } catch (Exception e) {
-            return HttpMethod.CUSTOM;
-        }
+        this.httpMethod = HttpMethod.parse(methodName);
     }
 
     /**

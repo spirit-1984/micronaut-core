@@ -110,4 +110,17 @@ public enum HttpMethod implements CharSequence {
             || method.equals(DELETE)
             || method.equals(CUSTOM));
     }
+
+    /**
+     * Performs a safe parse.
+     * @param methodName The name of http method
+     * @return A parsed method. If failed to parse, returns CUSTOM
+     */
+    public static HttpMethod parse(String methodName) {
+        try {
+            return HttpMethod.valueOf(methodName);
+        } catch (Exception e) {
+            return CUSTOM;
+        }
+    }
 }

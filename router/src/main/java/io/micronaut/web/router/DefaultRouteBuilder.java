@@ -369,7 +369,16 @@ public abstract class DefaultRouteBuilder implements RouteBuilder {
         return buildBeanRoute(HttpMethod.TRACE, uri, beanDefinition, method);
     }
 
-    public UriRoute buildCustomBeanRoute(String methodName, HttpMethod httpMethod, String uri, BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
+    /**
+     * Build a route for bean method.
+     * @param methodName  Method name
+     * @param httpMethod Http method
+     * @param uri URI
+     * @param beanDefinition Definition of bean
+     * @param method Executable
+     * @return route
+     */
+    protected UriRoute buildCustomBeanRoute(String methodName, HttpMethod httpMethod, String uri, BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
         return buildBeanRoute(methodName, httpMethod, uri, beanDefinition, method);
     }
 
@@ -417,12 +426,12 @@ public abstract class DefaultRouteBuilder implements RouteBuilder {
         }
 
         if (!httpMethodName.equals(httpMethod.name())) {
+            System.out.println("Creating non standard route for method " + httpMethodName + " and uri " + uri);
             route = new CustomMethodRouteWrapper(httpMethodName, route);
         }
         this.uriRoutes.add(route);
         return route;
     }
-
 
     private UriRoute buildBeanRoute(HttpMethod httpMethod, String uri, BeanDefinition<?> beanDefinition, ExecutableMethod<?, ?> method) {
         return buildBeanRoute(httpMethod.name(), httpMethod, uri, beanDefinition, method);
@@ -1120,10 +1129,17 @@ public abstract class DefaultRouteBuilder implements RouteBuilder {
         }
     }
 
+    /**
+     * A route for non-standard http method.
+     */
     class CustomMethodRouteWrapper implements UriRoute {
         private final String methodName;
         private final UriRoute delegate;
 
+        /**
+         * @param methodName Name of the method
+         * @param delegate The delegate to transfer the job to.
+         */
         CustomMethodRouteWrapper(String methodName, UriRoute delegate) {
             this.methodName = methodName;
             this.delegate = delegate;

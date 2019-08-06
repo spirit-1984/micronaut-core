@@ -75,6 +75,11 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
         this(httpMethod, uri, httpMethod.name());
     }
 
+    /**
+     * @param httpMethod The http method
+     * @param uri The URI
+     * @param httpMethodName The actual http method name
+     */
     NettyClientHttpRequest(HttpMethod httpMethod, URI uri, String httpMethodName) {
         this.httpMethod = httpMethod;
         this.uri = uri;
@@ -89,6 +94,11 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
         this(httpMethod, uri, httpMethod.name());
     }
 
+    /**
+     * @param httpMethod The http method
+     * @param uri The URI
+     * @param httpMethodName The actual http method name
+     */
     NettyClientHttpRequest(HttpMethod httpMethod, String uri, String httpMethodName) {
         this(httpMethod, URI.create(uri), httpMethodName);
     }
