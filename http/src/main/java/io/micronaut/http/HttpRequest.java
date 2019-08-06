@@ -351,7 +351,13 @@ public interface HttpRequest<B> extends HttpMessage<B> {
      */
     static <T> MutableHttpRequest<T> create(HttpMethod httpMethod, String uri) {
         Objects.requireNonNull(httpMethod, "Argument [httpMethod] is required");
+        return create(httpMethod, uri, httpMethod.name());
+    }
+
+    static <T> MutableHttpRequest<T> create(HttpMethod httpMethod, String uri, String httpMethodName) {
+        Objects.requireNonNull(httpMethod, "Argument [httpMethod] is required");
         Objects.requireNonNull(uri, "Argument [uri] is required");
-        return HttpRequestFactory.INSTANCE.create(httpMethod, uri);
+        Objects.requireNonNull(httpMethodName, "Argument [httpMethodName] is required");
+        return HttpRequestFactory.INSTANCE.create(httpMethod, uri, httpMethodName);
     }
 }

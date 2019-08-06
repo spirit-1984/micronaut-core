@@ -15,40 +15,25 @@
  */
 package io.micronaut.http.client.docs.basics;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.core.io.buffer.ByteBuffer;
 import io.micronaut.core.type.Argument;
-import io.micronaut.http.HttpMethod;
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpRequestFactory;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.uri.UriBuilder;
 import io.micronaut.runtime.server.EmbeddedServer;
-
-import static io.micronaut.http.HttpRequest.*;
-import static org.junit.Assert.*;
-
 import io.reactivex.Flowable;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static io.micronaut.http.HttpRequest.GET;
+import static io.micronaut.http.HttpRequest.POST;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author graemerocher
@@ -241,47 +226,5 @@ public class HelloControllerTest {
 
         embeddedServer.stop();
         client.stop();
-    }
-
-    private static void allowMethods(String... methods) {
-        try {
-            Field methodsField = HttpURLConnection.class.getDeclaredField("methods");
-
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(methodsField, methodsField.getModifiers() & ~Modifier.FINAL);
-
-            methodsField.setAccessible(true);
-
-            String[] oldMethods = (String[]) methodsField.get(null);
-            Set<String> methodsSet = new LinkedHashSet<>(Arrays.asList(oldMethods));
-            methodsSet.addAll(Arrays.asList(methods));
-            String[] newMethods = methodsSet.toArray(new String[0]);
-
-            methodsField.set(null, newMethods);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Test
-    public void testSimpleReport() throws IOException {
-        allowMethods("REPORT");
-        EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer.class);
-
-        URL url = new URL(embeddedServer.getURL().toString() + "/report/John");
-        System.out.println("Embedded server url is: " + url);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("REPORT");
-
-        int status = con.getResponseCode();
-        assertEquals(HttpStatus.CREATED.getCode(), status);
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-            String line = br.readLine();
-            assertEquals("REPORT John", line);
-        }
-
-        embeddedServer.stop();
     }
 }

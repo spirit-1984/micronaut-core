@@ -192,7 +192,7 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
      */
     HttpRequest getFullRequest(ByteBuf content) {
         String uriStr = resolveUriPath();
-        io.netty.handler.codec.http.HttpMethod method = io.netty.handler.codec.http.HttpMethod.valueOf(httpMethod.name());
+        io.netty.handler.codec.http.HttpMethod method = io.netty.handler.codec.http.HttpMethod.valueOf(getMethodName());
         DefaultFullHttpRequest req = content != null ? new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uriStr, content) :
             new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uriStr);
         req.headers().setAll(headers.getNettyHeaders());
@@ -205,7 +205,7 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
      */
     HttpRequest getStreamedRequest(Publisher<HttpContent> publisher) {
         String uriStr = resolveUriPath();
-        io.netty.handler.codec.http.HttpMethod method = io.netty.handler.codec.http.HttpMethod.valueOf(httpMethod.name());
+        io.netty.handler.codec.http.HttpMethod method = io.netty.handler.codec.http.HttpMethod.valueOf(getMethodName());
         HttpRequest req = publisher != null ? new DefaultStreamedHttpRequest(HttpVersion.HTTP_1_1, method, uriStr, publisher) :
             new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uriStr);
         req.headers().setAll(headers.getNettyHeaders());

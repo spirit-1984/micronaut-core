@@ -30,7 +30,7 @@ import io.reactivex.Maybe;
  * @author graemerocher
  * @since 1.0
  */
-@Controller("/")
+@Controller
 public class HelloController {
 
     private final RxHttpClient httpClient;
@@ -69,11 +69,5 @@ public class HelloController {
     @Status(HttpStatus.CREATED)
     String echoHello(@Body String message) {
         return message;
-    }
-
-    @CustomHttpMethod(method="REPORT", value="/report/{name}")
-    @Status(HttpStatus.CREATED)
-    String report(String name) {
-        return "REPORT " + name;
     }
 }
