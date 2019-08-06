@@ -66,7 +66,12 @@ public enum HttpMethod implements CharSequence {
     /**
      * See https://tools.ietf.org/html/rfc5789.
      */
-    PATCH;
+    PATCH,
+
+    /**
+     * A special type not provided by RFC. Used for non-standard http methods (i.e. the Webdav protocol).
+     */
+    CUSTOM;
 
     @Override
     public int length() {
@@ -100,8 +105,9 @@ public enum HttpMethod implements CharSequence {
      * @return True if it does
      */
     public static boolean permitsRequestBody(HttpMethod method) {
-        return requiresRequestBody(method)
+        return method != null || (requiresRequestBody(method)
             || method.equals(OPTIONS)
-            || method.equals(DELETE);
+            || method.equals(DELETE)
+            || method.equals(CUSTOM));
     }
 }

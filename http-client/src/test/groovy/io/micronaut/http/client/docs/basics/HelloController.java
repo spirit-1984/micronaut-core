@@ -71,4 +71,9 @@ public class HelloController {
         return message;
     }
 
+    @CustomHttpMethod(method="REPORT", value="/report/{name}")
+    @Status(HttpStatus.CREATED)
+    String report(String name) {
+        return "REPORT " + name;
+    }
 }

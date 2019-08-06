@@ -49,6 +49,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
+
 /**
  * Delegates to the Netty {@link io.netty.handler.codec.http.HttpRequest} instance.
  *
@@ -102,7 +104,7 @@ public class NettyHttpRequest<T> extends AbstractNettyHttpRequest<T> implements 
 
     @Override
     public String toString() {
-        return getMethod() + " " + getUri();
+        return getMethodName() + " " + getUri();
     }
 
     /**
@@ -364,4 +366,9 @@ public class NettyHttpRequest<T> extends AbstractNettyHttpRequest<T> implements 
         return attr.getAndSet(null);
     }
 
+    @Nonnull
+    @Override
+    public String getMethodName() {
+        return methodName;
+    }
 }

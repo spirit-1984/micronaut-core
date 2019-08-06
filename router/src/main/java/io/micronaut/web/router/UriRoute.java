@@ -46,6 +46,10 @@ public interface UriRoute extends Route, UriMatcher, Comparable<UriRoute> {
      */
     HttpMethod getHttpMethod();
 
+    default String getHttpMethodName() {
+        return getHttpMethod().name();
+    }
+
     /**
      * @return The {@link UriMatchTemplate} used to match URIs
      */

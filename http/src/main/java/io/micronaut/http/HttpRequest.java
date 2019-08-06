@@ -15,16 +15,17 @@
  */
 package io.micronaut.http;
 
-import io.micronaut.http.cookie.Cookies;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import io.micronaut.http.cookie.Cookies;
 
 /**
  * <p>Common interface for HTTP request implementations.</p>
@@ -50,6 +51,10 @@ public interface HttpRequest<B> extends HttpMessage<B> {
      * @return The request method
      */
     @Nonnull HttpMethod getMethod();
+
+    default @Nonnull String getMethodName() {
+        return getMethod().name();
+    }
 
     /**
      * @return The full request URI

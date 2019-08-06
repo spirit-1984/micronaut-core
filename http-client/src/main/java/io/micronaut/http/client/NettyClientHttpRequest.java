@@ -22,6 +22,7 @@ import io.micronaut.core.convert.value.MutableConvertibleValues;
 import io.micronaut.core.convert.value.MutableConvertibleValuesMap;
 import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.StringUtils;
+import io.micronaut.http.HttpMethod;
 import io.micronaut.http.MutableHttpHeaders;
 import io.micronaut.http.MutableHttpParameters;
 import io.micronaut.http.MutableHttpRequest;
@@ -46,6 +47,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 /**
  * Default implementation of {@link MutableHttpRequest} for the {@link HttpClient}.
  *
@@ -59,6 +62,7 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
     private final NettyHttpHeaders headers = new NettyHttpHeaders();
     private final MutableConvertibleValues<Object> attributes = new MutableConvertibleValuesMap<>();
     private final io.micronaut.http.HttpMethod httpMethod;
+    private final String httpMethodName;
     private URI uri;
     private B body;
     private NettyHttpParameters httpParameters;
@@ -67,18 +71,26 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
      * @param httpMethod The Http method
      * @param uri        The URI
      */
-    NettyClientHttpRequest(io.micronaut.http.HttpMethod httpMethod, URI uri) {
+    NettyClientHttpRequest(HttpMethod httpMethod, URI uri) {
+        this(httpMethod, uri, httpMethod.name());
+    }
+
+    NettyClientHttpRequest(HttpMethod httpMethod, URI uri, String httpMethodName) {
         this.httpMethod = httpMethod;
         this.uri = uri;
+        this.httpMethodName = httpMethodName;
     }
 
     /**
      * @param httpMethod The Http method
      * @param uri        The URI
      */
-    NettyClientHttpRequest(io.micronaut.http.HttpMethod httpMethod, String uri) {
-        this.httpMethod = httpMethod;
-        this.uri = URI.create(uri);
+    NettyClientHttpRequest(HttpMethod httpMethod, String uri) {
+        this(httpMethod, uri, httpMethod.name());
+    }
+
+    NettyClientHttpRequest(HttpMethod httpMethod, String uri, String httpMethodName) {
+        this(httpMethod, URI.create(uri), httpMethodName);
     }
 
     @Override
@@ -215,6 +227,12 @@ class NettyClientHttpRequest<B> implements MutableHttpRequest<B> {
 
     @Override
     public String toString() {
-        return getMethod() + " " + uri;
+        return getMethodName() + " " + uri;
+    }
+
+    @Nonnull
+    @Override
+    public String getMethodName() {
+        return httpMethodName;
     }
 }

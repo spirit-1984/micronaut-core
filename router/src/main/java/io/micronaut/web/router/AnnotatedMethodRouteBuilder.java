@@ -20,12 +20,16 @@ import io.micronaut.context.processor.ExecutableMethodProcessor;
 import io.micronaut.core.annotation.AnnotationMetadata;
 import io.micronaut.core.convert.ConversionService;
 import io.micronaut.core.reflect.ClassLoadingReporter;
+import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.ArrayUtils;
 import io.micronaut.core.util.StringUtils;
+import io.micronaut.http.HttpMethod;
+import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Error;
 import io.micronaut.http.annotation.*;
+import io.micronaut.http.uri.UriMatchTemplate;
 import io.micronaut.http.uri.UriTemplate;
 import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.ExecutableMethod;
@@ -34,9 +38,11 @@ import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 /**
  * Responsible for building {@link Route} instances for the annotations found in the {@code io.micronaut.http.annotation}
@@ -104,6 +110,23 @@ public class AnnotatedMethodRouteBuilder extends DefaultRouteBuilder implements 
                 bean,
                 method);
             route = route.consumes(consumes).produces(produces);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Created Route: {}", route);
+            }
+        });
+
+        httpMethodsHandlers.put(CustomHttpMethod.class, (BeanDefinition bean, ExecutableMethod method) -> {
+            String uri = method.stringValue(HttpMethodMapping.class).orElse(UriMapping.DEFAULT_URI);
+            MediaType[] consumes = resolveConsumes(method);
+            MediaType[] produces = resolveProduces(method);
+            String methodName = method.stringValue(CustomHttpMethod.class, "method").get();
+            Route route = buildCustomBeanRoute(methodName, HttpMethod.CUSTOM, resolveUri(bean, uri,
+                    method,
+                    uriNamingStrategy),
+                    bean,
+                    method);
+            route = route.consumes(consumes).produces(produces);
+
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Created Route: {}", route);
             }

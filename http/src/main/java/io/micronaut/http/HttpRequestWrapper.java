@@ -20,6 +20,8 @@ import io.micronaut.http.cookie.Cookies;
 import java.net.InetSocketAddress;
 import java.net.URI;
 
+import javax.annotation.Nonnull;
+
 /**
  * A wrapper around a {@link HttpRequest}.
  *
@@ -54,6 +56,12 @@ public class HttpRequestWrapper<B> extends HttpMessageWrapper<B> implements Http
     @Override
     public HttpMethod getMethod() {
         return getDelegate().getMethod();
+    }
+
+    @Nonnull
+    @Override
+    public String getMethodName() {
+        return getDelegate().getMethodName();
     }
 
     @Override

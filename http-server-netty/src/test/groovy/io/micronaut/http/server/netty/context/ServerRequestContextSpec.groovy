@@ -20,6 +20,7 @@ import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Controller
+import io.micronaut.http.annotation.CustomHttpMethod
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Produces
 import io.micronaut.http.client.annotation.Client
@@ -100,6 +101,11 @@ class ServerRequestContextSpec extends Specification {
         String method() {
             def request = ServerRequestContext.currentRequest().orElseThrow { -> new RuntimeException("no request") }
             request.uri
+        }
+
+        @CustomHttpMethod(method = "REPORT", value = "/report")
+        String report() {
+            return "HELLO from REPORT"
         }
 
         @Get("/rxjava")

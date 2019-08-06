@@ -55,6 +55,10 @@ public interface Router {
      */
     <T, R> Stream<UriRouteMatch<T, R>> find(HttpMethod httpMethod, CharSequence uri);
 
+    default <T, R> Stream<UriRouteMatch<T, R>> find(HttpRequest request, CharSequence uri) {
+        return find(request.getMethod(), uri);
+    }
+
     /**
      * Returns all UriRoutes.
      *
@@ -227,7 +231,7 @@ public interface Router {
      * @return A {@link Stream} of possible {@link Route} instances.
      */
     default <T, R> Stream<UriRouteMatch<T, R>> find(HttpRequest<?> request) {
-        return find(request.getMethod(), request.getPath());
+        return find(request, request.getPath());
     }
 
 }

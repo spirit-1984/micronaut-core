@@ -29,6 +29,8 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 /**
  * Abstract implementation of {@link HttpRequest} for Netty.
  *
@@ -43,6 +45,7 @@ public abstract class AbstractNettyHttpRequest<B> extends DefaultAttributeMap im
     protected final ConversionService<?> conversionService;
     protected final HttpMethod httpMethod;
     protected final URI uri;
+    protected final String methodName;
 
     private NettyHttpParameters httpParameters;
     private MediaType mediaType;
@@ -59,7 +62,17 @@ public abstract class AbstractNettyHttpRequest<B> extends DefaultAttributeMap im
         this.conversionService = conversionService;
         String fullUri = nettyRequest.uri();
         this.uri = URI.create(fullUri);
-        this.httpMethod = HttpMethod.valueOf(nettyRequest.method().name());
+        this.methodName = nettyRequest.method().name().toUpperCase();
+        System.out.println("THE ACTUAL METHOD NAME IS: " + methodName);
+        this.httpMethod = parse(methodName);
+    }
+
+    private static HttpMethod parse(String methodName) {
+        try {
+            return HttpMethod.valueOf(methodName);
+        } catch (Exception e) {
+            return HttpMethod.CUSTOM;
+        }
     }
 
     /**
@@ -99,6 +112,12 @@ public abstract class AbstractNettyHttpRequest<B> extends DefaultAttributeMap im
         return Optional.ofNullable(contentType);
     }
 
+    @Nonnull
+    @Override
+    public String getMethodName() {
+        return methodName;
+    }
+
     @Override
     public Charset getCharacterEncoding() {
         Charset charset = this.charset;
@@ -133,6 +152,8 @@ public abstract class AbstractNettyHttpRequest<B> extends DefaultAttributeMap im
     public HttpMethod getMethod() {
         return httpMethod;
     }
+
+
 
     @Override
     public URI getUri() {

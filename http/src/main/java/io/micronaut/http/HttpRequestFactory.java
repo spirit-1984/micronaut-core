@@ -104,4 +104,8 @@ public interface HttpRequestFactory {
      * @return The request
      */
     <T> MutableHttpRequest<T> create(HttpMethod httpMethod, String uri);
+
+    default <T> MutableHttpRequest<T> create(HttpMethod httpMethod, String uri, String methodName) {
+        return create(httpMethod, uri);
+    }
 }
